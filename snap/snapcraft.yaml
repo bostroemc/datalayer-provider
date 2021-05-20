@@ -1,0 +1,58 @@
+name: rexroth-python-provider
+version: 1.0.0
+summary: Testsnap for Python
+# title: SDK-Python
+description: 'It Provides simple data to ctrlX Data Layer
+'
+base: core18
+confinement: strict
+grade: stable
+
+apps:
+  interpreter:
+    command: python3
+    plugs:
+      - network-bind
+      - network-observe
+      - serial-port
+
+  provider:
+    command: ./wrapper/register_node
+    plugs:
+      - network-bind
+      - network-status
+    daemon: simple
+
+  #jupyter:
+  #  command: jupyter-notebook --allow-root
+  #  plugs:
+   #   - network-bind
+   #   - network-status
+   #   - network-observe
+   #   - serial-port
+
+parts:
+  interpreter:
+    plugin: python
+    python-version: python3
+    source: .
+    #python-packages:
+      #- jupyter
+
+  provider:
+    plugin: python
+    python-version: python3
+    source: .
+    python-packages:
+      - ./whl/ctrlx_datalayer-1.0.1-py3-none-any.whl
+
+  files:
+    plugin: dump
+    source: . 
+
+# describes which interface slots are supported by defining the plugs
+plugs:
+  datalayer:
+    interface: content
+    content: datalayer
+    target: $SNAP_DATA/.datalayer 
