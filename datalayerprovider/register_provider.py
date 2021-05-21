@@ -50,7 +50,7 @@ def run_provider(provider : datalayer.provider.Provider):
         count=0
         while True:
             count=count+1
-            if count > 3599:
+            if count > 299:
                 break
             time.sleep(1)
         
