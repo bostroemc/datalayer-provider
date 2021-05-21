@@ -60,7 +60,7 @@ class MyProviderNode:
         cb(Result(Result.OK), new_data)
     
     def __on_write(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        print("bostroemc: __on_write"+ data.get_string())
+        print("bostroemc: __on_write", data.get_string())
         self.dataString = data.get_string()
         cb(Result(Result.OK), None)
 
