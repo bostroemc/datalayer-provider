@@ -36,10 +36,14 @@ def run_provider(provider : datalayer.provider.Provider):
     print("bostroemc: Starting provider...")
     provider_node = datalayerprovider.my_provider_node.MyProviderNode()
     with datalayer.provider_node.ProviderNode(provider_node.cbs, 1234) as node:
-        result = provider.register_node("myData/myString", node)
+        result = provider.register_node("myData/job", node)
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Register Data Provider failed with: ", result)
 
+          result = provider.register_node("myData/pop", node)
+        if result != datalayer.variant.Result.OK:
+            print("bostroemc: Register Data Provider failed with: ", result)
+  
         result= provider.start()
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Starting Provider failed with: ", result)
@@ -59,7 +63,10 @@ def run_provider(provider : datalayer.provider.Provider):
 
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Stopping Provider failed with: ", result)
-        result = provider.unregister_node("myData/myString")
+        result = provider.unregister_node("myData/job")
+        if result != datalayer.variant.Result.OK:
+            print("bostroemc: Unregister Data Provider failed with: ", result)
+        result = provider.unregister_node("myData/pop")
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Unregister Data Provider failed with: ", result)
 
