@@ -40,7 +40,7 @@ def run_provider(provider : datalayer.provider.Provider):
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Register Data Provider failed with: ", result)
 
-          result = provider.register_node("myData/pop", node)
+        result = provider.register_node("myData/pop", node)
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Register Data Provider failed with: ", result)
   
@@ -63,9 +63,11 @@ def run_provider(provider : datalayer.provider.Provider):
 
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Stopping Provider failed with: ", result)
+
         result = provider.unregister_node("myData/job")
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Unregister Data Provider failed with: ", result)
+            
         result = provider.unregister_node("myData/pop")
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Unregister Data Provider failed with: ", result)
