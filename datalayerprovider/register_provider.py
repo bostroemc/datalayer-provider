@@ -50,9 +50,9 @@ def run_provider(provider : datalayer.provider.Provider):
         count=0
         while True:
             count=count+1
-            if count > 9:
+            if count > 3599:
                 break
-            time.sleep(120)
+            time.sleep(1)
         
         result = provider.stop()
         print("bostroemc: Stopping provider loop...")

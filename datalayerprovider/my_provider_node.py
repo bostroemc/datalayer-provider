@@ -54,13 +54,13 @@ class MyProviderNode:
         cb(Result(Result.OK), new_data)
 
     def __on_read(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        print("__on_read", userdata)
+        print("bostroemc: __on_read", userdata)
         new_data = Variant()
         new_data.set_string(self.dataString)
         cb(Result(Result.OK), new_data)
     
     def __on_write(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        print("__on_write")
+        print("bostroemc: __on_write"+ data.get_string())
         self.dataString = data.get_string()
         cb(Result(Result.OK), None)
 
