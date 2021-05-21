@@ -35,46 +35,45 @@ def run_provider(provider : datalayer.provider.Provider):
 
     print("bostroemc: Starting provider...")
     provider_node = datalayerprovider.my_provider_node.MyProviderNode()
+    provider_node_2 = datalayerprovider.my_provider_node.MyProviderNode()
 
-    with datalayer.provider_node.ProviderNode(provider_node.cbs, 1234) as node:
+    with datalayer.provider_node.ProviderNode(provider_node.cbs, 1234) as node, datalayer.provider_node.ProviderNode(provider_node_2.cbs, 1234) as node_2:
         result = provider.register_node("mechatronics/job_request", node)
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Register Data Provider failed with: ", result)
 
-        provider_node_2 = datalayerprovider.my_provider_node.MyProviderNode()
+        result = provider.register_node("mechatronics/pop", node_2)
+        if result != datalayer.variant.Result.OK:
+            print("bostroemc: Register Data Provider failed with: ", result)
 
-        with datalayer.provider_node.ProviderNode(provider_node_2.cbs, 1234) as node_2:
-            result = provider.register_node("mechatronics/pop", node_2)
-            if result != datalayer.variant.Result.OK:
-                print("bostroemc: Register Data Provider failed with: ", result)
-    
-            result= provider.start()
-            if result != datalayer.variant.Result.OK:
-                print("bostroemc: Starting Provider failed with: ", result)
-                
-            print("bostroemc: Provider started...")
-            print("bostroemc: Running endless loop...")
-
-            count=0
-            while True:
-                count=count+1
-                if count > 3599:
-                    break
-                time.sleep(1)
+        result= provider.start()
+        if result != datalayer.variant.Result.OK:
+            print("bostroemc: Starting Provider failed with: ", result)
             
-            result = provider.stop()
-            print("bostroemc: Stopping provider loop...")
+        print("bostroemc: Provider started...")
+        print("bostroemc: Running endless loop...")
 
-            if result != datalayer.variant.Result.OK:
-                print("bostroemc: Stopping Provider failed with: ", result)
+        count=0
+        while True:
+            count=count+1
+            if count > 3599:
+                break
+            time.sleep(1)
+            provider_node_2.dataString = str(count)
+        
+        result = provider.stop()
+        print("bostroemc: Stopping provider loop...")
 
-            result = provider.unregister_node("mechatronics/job_request")
-            if result != datalayer.variant.Result.OK:
-                print("bostroemc: Unregister Data Provider failed with: ", result)
+        if result != datalayer.variant.Result.OK:
+            print("bostroemc: Stopping Provider failed with: ", result)
 
-            result = provider.unregister_node("mechatronics/pop")
-            if result != datalayer.variant.Result.OK:
-                print("bostroemc: Unregister Data Provider failed with: ", result)
+        result = provider.unregister_node("mechatronics/job_request")
+        if result != datalayer.variant.Result.OK:
+            print("bostroemc: Unregister Data Provider failed with: ", result)
+
+        result = provider.unregister_node("mechatronics/pop")
+        if result != datalayer.variant.Result.OK:
+            print("bostroemc: Unregister Data Provider failed with: ", result)
 
 def run():
     print("bostroemc: Simple Snap for ctrlX Datalayer Provider with Python")
