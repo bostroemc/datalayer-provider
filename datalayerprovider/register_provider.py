@@ -34,10 +34,12 @@ connectionProvider = "tcp://boschrexroth:boschrexroth@127.0.0.1:2070"
 def run_provider(provider : datalayer.provider.Provider):
 
     print("bostroemc: Starting provider...")
-    provider_node = datalayerprovider.my_provider_node.MyProviderNode()
-    provider_node_2 = datalayerprovider.my_provider_node.MyProviderNode()
+    queue = ['red', 'blue', 'green']
 
-    with datalayer.provider_node.ProviderNode(provider_node.cbs, 1234) as node, datalayer.provider_node.ProviderNode(provider_node_2.cbs, 1234) as node_2:
+    node_push = datalayerprovider.my_provider_node.NodePush(queue)
+    node_pop = datalayerprovider.my_provider_node.NodePop(queue)
+
+    with datalayer.provider_node.ProviderNode(node_push.cbs, 1234) as node, datalayer.provider_node.ProviderNode(node_pop.cbs, 1234) as node_2:
         result = provider.register_node("mechatronics/job_request", node)
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Register Data Provider failed with: ", result)
@@ -59,7 +61,6 @@ def run_provider(provider : datalayer.provider.Provider):
             if count > 3599:
                 break
             time.sleep(1)
-            provider_node_2.dataString = str(count)
         
         result = provider.stop()
         print("bostroemc: Stopping provider loop...")
