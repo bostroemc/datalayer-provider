@@ -25,7 +25,7 @@ from datalayer.provider_node import ProviderNodeCallbacks, NodeCallback
 from datalayer.variant import Result, Variant
 
 class MyProviderNode:
-    dataString: str = "Hello from Python Provider"
+    dataString: str = "bostroemc: Hello from Python Provider"
     
     def __init__(self):
         self.cbs = ProviderNodeCallbacks(
