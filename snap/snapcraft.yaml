@@ -1,5 +1,5 @@
 name: datalayer-provider
-version: 1.2.0
+version: 1.2.1
 summary: Testsnap for Python
 # title: SDK-Python
 description: 'It Provides simple data to ctrlX Data Layer
@@ -39,7 +39,7 @@ parts:
   interpreter:
     plugin: python
     python-version: python3
-    source: 
+    source: .
     python-packages:
       #- jupyter
       - jsonschema
