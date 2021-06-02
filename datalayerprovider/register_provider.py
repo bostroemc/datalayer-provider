@@ -28,12 +28,11 @@ import sqlite3
 from sqlite3 import Error
 
 import datalayer
-
 import datalayerprovider.my_provider_node
 
 connectionProvider = "tcp://boschrexroth:boschrexroth@127.0.0.1:2070"
 
-def create_connection(db_file)
+def create_connection(db_file):
     conn = None
     try:
         conn = sqlite3.connect(db_file)
@@ -44,7 +43,7 @@ def create_connection(db_file)
 
     return conn
 
-def create_table(conn, table)
+def create_table(conn, table):
     try:
         c = conn.cursor()
         c.execute(table)
@@ -52,7 +51,7 @@ def create_table(conn, table)
     except Error as e:
         print(e)
 
-def add_job_order(conn, job_order)
+def add_job_order(conn, job_order):
     try:
         sql = ''' INSERT INTO order_history(job_order)
                     VALUE(?)'''
@@ -73,7 +72,7 @@ def run_provider(provider : datalayer.provider.Provider):
     print("bostroemc: Starting provider...")
     queue = []
 
-    db = "$SNAP_USER_DATA/temp.db"
+    db = "$SNAP_DATA/temp.db"
 
     table_project = """CREATE TABLE IF NOT EXISTS order_history (
                         id integer PRIMARY KEY,
