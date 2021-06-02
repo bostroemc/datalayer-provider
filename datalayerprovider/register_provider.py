@@ -72,7 +72,9 @@ def run_provider(provider : datalayer.provider.Provider):
     print("bostroemc: Starting provider...")
     queue = []
 
-    db = "$SNAP_DATA/temp.db"
+    db = "$SNAP_COMMON/temp.db"
+
+    print(db)
 
     table_project = """CREATE TABLE IF NOT EXISTS order_history (
                         id integer PRIMARY KEY,
