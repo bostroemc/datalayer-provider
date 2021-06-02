@@ -24,6 +24,8 @@ import os
 import sys
 import signal
 import time
+import sqlite3
+from sqlite3 import Error
 
 import datalayer
 
@@ -31,14 +33,70 @@ import datalayerprovider.my_provider_node
 
 connectionProvider = "tcp://boschrexroth:boschrexroth@127.0.0.1:2070"
 
+def create_connection(db_file)
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+        return conn
+    
+    except Error as e:
+        print(e)
+
+    return conn
+
+def create_table(conn, table)
+    try:
+        c = conn.cursor()
+        c.execute(table)
+
+    except Error as e:
+        print(e)
+
+def add_job_order(conn, job_order)
+    try:
+        sql = ''' INSERT INTO order_history(job_order)
+                    VALUE(?)'''
+        
+        c = conn.curser()
+        c.execute(sql, job_order)
+        conn.commit()
+
+        return c.lastrowid
+
+    except Error as e:
+        print(e)
+
+
+
 def run_provider(provider : datalayer.provider.Provider):
 
     print("bostroemc: Starting provider...")
     queue = []
 
-    node_push = datalayerprovider.my_provider_node.NodePush(queue)
-    node_pop = datalayerprovider.my_provider_node.NodePop(queue)
-    node_count = datalayerprovider.my_provider_node.Node(queue)
+    db = "$SNAP_USER_DATA/temp.db"
+
+    table_project = """CREATE TABLE IF NOT EXISTS order_history (
+                        id integer PRIMARY KEY,
+                        job_order text
+                    );"""
+
+    conn = create_connection(db)
+
+    if conn:
+        create_table(conn, table_project)
+        job_order = ('{"name": ["carl", "bostroem"]}',)
+        add_job_order(conn, job_order)                
+    else:
+        print("bostroemc..db conn failed")
+
+    node_push = datalayerprovider.my_provider_node.NodePush(queue)  #add job to queue
+    node_pop = datalayerprovider.my_provider_node.NodePop(queue)    #pop job from queue
+    node_count = datalayerprovider.my_provider_node.Node(queue)     #return queue/pending count
+    # node_dump = datalayerprovider.my_provider_node.Dump(queue)      #dump queue
+    # node_fetch = datalayerprovider.my_provider_node.Fetch(queue)    #fetch items from db
+    # node_done =  datalayerprovider.my_provider_node.Done(queue)     #add item to db or mark item in db as done
+
+
 
     with datalayer.provider_node.ProviderNode(node_push.cbs, 1234) as node, datalayer.provider_node.ProviderNode(node_pop.cbs, 1234) as node_2, datalayer.provider_node.ProviderNode(node_count.cbs, 1234) as node_3:
         result = provider.register_node("mechatronics/job_request", node)
