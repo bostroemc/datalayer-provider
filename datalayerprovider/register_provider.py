@@ -72,7 +72,7 @@ def run_provider(provider : datalayer.provider.Provider):
     print("bostroemc: Starting provider...")
     queue = []
 
-    db = "$SNAP_COMMON/temp.db"
+    db =  "/var/snap/datalayer-provider/common/temp.db"   #"$SNAP_COMMON/temp.db"
 
     print(db)
 
