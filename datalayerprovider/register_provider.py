@@ -46,12 +46,12 @@ def run_provider(provider : datalayer.provider.Provider):
                         job_order text
                     );"""
 
-    conn = create_connection(db)
+    conn = datalayerprovider.database_utils.create_connection(db)
 
     if conn:
-        create_table(conn, table_project)
+        datalayerprovider.database_utils.create_table(conn, table_project)
         job_order = ('{"name": ["carl", "bostroem"]}',)
-        add_job_order(conn, job_order)                
+        datalayerprovider.database_utils.add_job_order(conn, job_order)                
     else:
         print("bostroemc..db conn failed")
 
