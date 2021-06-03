@@ -73,7 +73,8 @@ def run_provider(provider : datalayer.provider.Provider):
     queue = []
 
     # db =  "/var/snap/datalayer-provider/common/temp.db"   
-    db = os.environ.get("SNAP_COMMON") + "temp2.db"
+    db = os.environ.get("SNAP_COMMON") + "/temp2.db"
+    print(db)
 
     table_project = """CREATE TABLE IF NOT EXISTS order_history (
                         id integer PRIMARY KEY,
