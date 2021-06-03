@@ -56,7 +56,7 @@ def add_job_order(conn, job_order):
         sql = ''' INSERT INTO order_history(job_order)
                     VALUE(?)'''
         
-        c = conn.curser()
+        c = conn.cursor()
         c.execute(sql, job_order)
         conn.commit()
 
@@ -73,7 +73,7 @@ def run_provider(provider : datalayer.provider.Provider):
     queue = []
 
     # db =  "/var/snap/datalayer-provider/common/temp.db"   
-    db = r"/$SNAP_COMMON/temp2.db"
+    db = os.environ.get("SNAP_COMMON") + "temp2.db"
 
     table_project = """CREATE TABLE IF NOT EXISTS order_history (
                         id integer PRIMARY KEY,
