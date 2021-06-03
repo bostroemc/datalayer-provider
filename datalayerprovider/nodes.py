@@ -28,7 +28,9 @@ import json
 import time
 from jsonschema import validate
 
-class NodePush:
+import datalayerprovider.database_utils
+
+class Push:
     dataString: str = "Hello from Python Provider"
     id : int = 0
 
@@ -97,7 +99,7 @@ class NodePush:
         print("__on_metadata")
         cb(Result(Result.OK), None)
 
-class NodePop:
+class Pop:
     dataString: str = "Hello from Python Provider"
     
     def __init__(self, queue):
@@ -139,7 +141,7 @@ class NodePop:
     def __on_metadata(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
         cb(Result(Result.OK), None)        
 
-class Node:
+class Count:
     data: int = 0
     
     def __init__(self, queue):
