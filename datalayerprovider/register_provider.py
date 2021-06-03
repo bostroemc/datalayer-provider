@@ -72,9 +72,8 @@ def run_provider(provider : datalayer.provider.Provider):
     print("bostroemc: Starting provider...")
     queue = []
 
-    db =  "/var/snap/datalayer-provider/common/temp.db"   #"$SNAP_COMMON/temp.db"
-
-    print(db)
+    # db =  "/var/snap/datalayer-provider/common/temp.db"   
+    db = r"/$SNAP_COMMON/temp2.db"
 
     table_project = """CREATE TABLE IF NOT EXISTS order_history (
                         id integer PRIMARY KEY,
