@@ -1,5 +1,5 @@
 name: datalayer-provider
-version: 1.2.6
+version: 1.2.7
 summary: Testsnap for Python
 # title: SDK-Python
 description: 'It Provides simple data to ctrlX Data Layer
@@ -27,21 +27,12 @@ apps:
       - network-status
     daemon: simple
 
-  #jupyter:
-  #  command: jupyter-notebook --allow-root
-  #  plugs:
-   #   - network-bind
-   #   - network-status
-   #   - network-observe
-   #   - serial-port
-
 parts:
   interpreter:
     plugin: python
     python-version: python3
     source: .
     python-packages:
-      #- jupyter
       - jsonschema
 
   provider:
