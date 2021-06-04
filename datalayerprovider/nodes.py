@@ -73,8 +73,11 @@ class Push:
         cb(Result(Result.OK), new_data)
 
     def __on_read(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
+#        new_data = Variant()
+#        new_data.set_string(json.dumps(self.queue))
         new_data = Variant()
-        new_data.set_string(json.dumps(self.queue))
+        new_data.set_string(json.dumps(datalayerprovider.database_utils.fetch(self.conn, 10, 0)))        
+
         cb(Result(Result.OK), new_data)
     
     def __on_write(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):

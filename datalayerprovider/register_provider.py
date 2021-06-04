@@ -41,10 +41,6 @@ def run_provider(provider : datalayer.provider.Provider):
     
     db = os.environ.get("SNAP_COMMON") + "/temp.db"  # "/var/snap/datalayer-provider/common/temp.db"   
     conn = datalayerprovider.database_utils.initialize(db)
-    job_order = {"name": ["carl", "bostroem"]}
-    datalayerprovider.database_utils.add_job_order(conn, json.dumps(job_order))
-    datalayerprovider.database_utils.add_job_order(conn, json.dumps(job_order))
-    datalayerprovider.database_utils.add_job_order(conn, json.dumps(job_order))
 
     node_push = datalayerprovider.nodes.Push(queue, conn)  #add job to queue
     node_pop = datalayerprovider.nodes.Pop(queue, conn)    #pop job from queue

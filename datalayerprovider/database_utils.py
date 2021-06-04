@@ -74,3 +74,16 @@ def count(conn):
 
     except Error as e:
         print(e)             
+
+def fetch(conn, limit, offset):
+    try:
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute(f'SELECT * FROM order_history LIMIT {limit} OFFSET {offset}')    
+
+        r = [dict((c.description[i][0], value) for i, value in enumerate(row)) for row in c.fetchall()]
+
+        return r
+
+    except Error as e:
+        print(e)             
