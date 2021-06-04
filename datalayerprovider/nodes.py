@@ -26,6 +26,7 @@ from datalayer.variant import Result, Variant
 
 import json
 import time
+import os
 from jsonschema import validate
 
 import datalayerprovider.database_utils
@@ -91,10 +92,14 @@ class Push:
         
  #       self.id+=1
         test = json.loads(data.get_string())
-        print(test)
 
-        datalayerprovider.database_utils.add_job_order(self.conn, test)
-        datalayerprovider.database_utils.add_job_order(self.conn, data.get_string())
+        db = os.environ.get("SNAP_COMMON") + "/temp.db"  # "/var/snap/datalayer-provider/common/temp.db"   
+        conn = datalayerprovider.database_utils.initialize(db)
+
+        datalayerprovider.database_utils.add_job_order(conn, test)
+        datalayerprovider.database_utils.add_job_order(conn, data.get_string())
+
+        conn.close()
  
         cb(Result(Result.OK), None)
 
