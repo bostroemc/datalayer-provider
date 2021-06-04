@@ -53,7 +53,7 @@ class Push:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = queue,
+        self.queue = queue
         self.conn = conn
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
@@ -94,6 +94,7 @@ class Push:
         print(test)
 
         datalayerprovider.database_utils.add_job_order(self.conn, test)
+        datalayerprovider.database_utils.add_job_order(self.conn, data.get_string())
  
         cb(Result(Result.OK), None)
 
@@ -113,7 +114,7 @@ class Pop:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = queue,
+        self.queue = queue
         self.conn = conn
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
@@ -156,7 +157,7 @@ class Count:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = queue,
+        self.queue = queue
         self.conn = conn
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
@@ -206,7 +207,7 @@ class Done:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = queue,
+        self.queue = queue
         self.conn = conn
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
@@ -251,7 +252,7 @@ class Dump:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = queue,
+        self.queue = queue
         self.conn = conn
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
