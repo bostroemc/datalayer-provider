@@ -39,13 +39,6 @@ def run_provider(provider : datalayer.provider.Provider):
     queue = []
     
     db = os.environ.get("SNAP_COMMON") + "/temp.db"  # "/var/snap/datalayer-provider/common/temp.db"   
-    print(db)
-
-    table_project = """CREATE TABLE IF NOT EXISTS order_history (
-                        id integer PRIMARY KEY,
-                        job_order text
-                    );"""
-
     conn = datalayerprovider.database_utils.create_connection(db)
 
     if conn:
@@ -55,18 +48,18 @@ def run_provider(provider : datalayer.provider.Provider):
     else:
         print("bostroemc..db conn failed")
 
-    node_push = datalayerprovider.nodes.Push(queue)  #add job to queue
-    node_pop = datalayerprovider.nodes.Pop(queue)    #pop job from queue
-    node_count = datalayerprovider.nodes.Count(queue)     #return queue/pending count
-    node_dump = datalayerprovider.nodes.Dump(queue)      #dump queue
+    node_push = datalayerprovider.nodes.Push(queue, conn)  #add job to queue
+    node_pop = datalayerprovider.nodes.Pop(queue, conn)    #pop job from queue
+    node_count = datalayerprovider.nodes.Count(queue, conn)     #return queue/pending count
+    node_dump = datalayerprovider.nodes.Dump(queue, conn)      #dump queue
     # node_fetch = datalayerprovider.my_provider_node.Fetch(queue)    #fetch items from db
-    node_done =  datalayerprovider.nodes.Done(queue)     #add item to db or mark item in db as done
+    node_done =  datalayerprovider.nodes.Done(queue, conn)     #add item to db or mark item in db as done
 
 
     with datalayer.provider_node.ProviderNode(node_push.cbs, 1234) as node,         \
             datalayer.provider_node.ProviderNode(node_pop.cbs, 1234) as node_2,     \
             datalayer.provider_node.ProviderNode(node_count.cbs, 1234) as node_3,   \
-            datalayer.provider_node.ProviderNode(node_dump.cbs, 1234) as node_4,   \
+            datalayer.provider_node.ProviderNode(node_dump.cbs, 1234) as node_4,    \
             datalayer.provider_node.ProviderNode(node_done.cbs, 1234) as node_5:
         result = provider.register_node("mechatronics/job_request", node)
         if result != datalayer.variant.Result.OK:
@@ -87,7 +80,6 @@ def run_provider(provider : datalayer.provider.Provider):
         result = provider.register_node("mechatronics/done", node_5)
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Register count failed with: ", result)        
-
 
         result= provider.start()
         if result != datalayer.variant.Result.OK:
