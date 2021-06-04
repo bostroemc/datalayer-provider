@@ -75,8 +75,14 @@ class Push:
     def __on_read(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
 #        new_data = Variant()
 #        new_data.set_string(json.dumps(self.queue))
+
+        db = os.environ.get("SNAP_COMMON") + "/temp.db"  # "/var/snap/datalayer-provider/common/temp.db"   
+        conn = datalayerprovider.database_utils.initialize(db)
+
         new_data = Variant()
-        new_data.set_string(json.dumps(datalayerprovider.database_utils.fetch(self.conn, 10, 0)))        
+        new_data.set_string(json.dumps(datalayerprovider.database_utils.fetch(conn, 10, 0)))   
+
+        conn.close()     
 
         cb(Result(Result.OK), new_data)
     
