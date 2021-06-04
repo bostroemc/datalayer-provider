@@ -31,7 +31,7 @@ def initialize(db):
 def add_job_order(conn, job_order):
     try:
         s = ''' INSERT INTO order_history(job_order, time_in, status)
-                    VALUE(?, ?, ?);'''
+                    VALUES(?, ?, ?);'''
         
         time_in =  time.strftime("%H:%M:%S", time.localtime())       
         status = 0    # pending=0, active=1, done=2
