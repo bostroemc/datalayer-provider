@@ -65,3 +65,12 @@ def create_table(conn, table):
 
     except Error as e:
         print(e)        
+
+def count(conn):
+    try:
+        c = conn.cursor()
+        h = c.execute("SELECT * FROM order_history")
+        return len(h.fetchall())
+
+    except Error as e:
+        print(e)             

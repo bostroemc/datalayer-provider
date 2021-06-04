@@ -90,7 +90,10 @@ class Push:
  #           print(e)       
         
  #       self.id+=1
-        datalayerprovider.database_utils.add_job_order(self.conn, data.get_string())
+        test = json.loads(data.get_string())
+        print(test)
+
+        datalayerprovider.database_utils.add_job_order(self.conn, test)
  
         cb(Result(Result.OK), None)
 
@@ -173,9 +176,14 @@ class Count:
         cb(Result(Result.OK), new_data)
 
     def __on_read(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        print("bostroemc: count __on_read", len(self.queue))
+        # print("bostroemc: count __on_read", len(self.queue))
+        # new_data = Variant()
+        # new_data.set_uint32(len(self.queue))
+
+        count = datalayerprovider.database_utils.count(self.conn)
         new_data = Variant()
-        new_data.set_uint32(len(self.queue))
+        new_data.set_uint32(count)
+
         cb(Result(Result.OK), new_data)
     
     def __on_write(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
