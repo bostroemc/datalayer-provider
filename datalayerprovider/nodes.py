@@ -27,6 +27,8 @@ from datalayer.variant import Result, Variant
 import json
 import time
 import os
+import sqlite3
+from sqlite3 import Error
 from jsonschema import validate
 
 import datalayerprovider.database_utils
@@ -96,7 +98,7 @@ class Push:
         db = os.environ.get("SNAP_COMMON") + "/temp.db"  # "/var/snap/datalayer-provider/common/temp.db"   
         conn = datalayerprovider.database_utils.initialize(db)
 
-        datalayerprovider.database_utils.add_job_order(conn, test)
+        # datalayerprovider.database_utils.add_job_order(conn, test)
         datalayerprovider.database_utils.add_job_order(conn, data.get_string())
 
         conn.close()
@@ -186,10 +188,14 @@ class Count:
         # new_data = Variant()
         # new_data.set_uint32(len(self.queue))
 
-        count = datalayerprovider.database_utils.count(self.conn)
+        db = os.environ.get("SNAP_COMMON") + "/temp.db"  # "/var/snap/datalayer-provider/common/temp.db"   
+        conn = datalayerprovider.database_utils.initialize(db)
+
+        count = datalayerprovider.database_utils.count(conn)
         new_data = Variant()
         new_data.set_uint32(count)
 
+        conn.close()
         cb(Result(Result.OK), new_data)
     
     def __on_write(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
