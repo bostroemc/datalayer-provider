@@ -176,7 +176,7 @@ class Count:
 
         conn = datalayerprovider.utils.initialize(self.db)
         if conn:
-            _data.set_uint32(datalayerprovider.utils.count(conn))
+            _data.set_uint32(datalayerprovider.utils.count_queue(conn))
             conn.close()
 
         cb(Result(Result.OK), _data)
