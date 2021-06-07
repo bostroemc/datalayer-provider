@@ -231,14 +231,11 @@ class Done:
 
         conn = datalayerprovider.utils.initialize(self.db)
         if conn:
-            self._value = json.dumps(datalayerprovider.utils.done(conn, data.get_uint32())}
+            self._value = json.dumps(datalayerprovider.utils.done(conn, data.get_uint32()))
             _data.set_string(self._value)           
             conn.close()
 
         cb(Result(Result.OK), _data)
 
     def __on_metadata(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
-        print("__on_metadata")
-        cb(Result(Result.OK), None)    
-
-                 
+        cb(Result(Result.OK), None)            
