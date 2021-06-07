@@ -63,7 +63,7 @@ def fetch_queue(conn, limit, offset):
 def fetch_history(conn, limit, offset):
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute("SELECT * FROM history LIMIT ? OFFSET ?", [limit, offset])       
+    c.execute("SELECT * FROM history ORDER BY id DESC LIMIT ? OFFSET ?", [limit, offset])       
     result =  c.fetchall()
 
     if result:   
