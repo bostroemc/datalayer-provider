@@ -231,7 +231,7 @@ class Done:
 
         conn = datalayerprovider.utils.initialize(self.db)
         if conn:
-            self._value = json.dumps(datalayerprovider.utils.done(conn, data.get_uint32()))
+            self._value = json.dumps(datalayerprovider.utils.done(conn, 1))
             _data.set_string(self._value)           
             conn.close()
 
