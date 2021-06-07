@@ -37,7 +37,9 @@ connectionProvider = "tcp://boschrexroth:boschrexroth@127.0.0.1:2070"
 def run_provider(provider : datalayer.provider.Provider):
     offset = [0, 0]  #Fetch offsets [queue, history]
     
-    db = "file:memdb1?mode=memory&cache=shared" #in-memory database used.     
+    # db = "file:memdb1?mode=memory&cache=shared" #in-memory database used.     
+    db = os.environ.get("SNAP_COMMON") + "/temp.db"
+    
     conn = datalayerprovider.utils.initialize(db) #Leave one connection instance open to maintain memory
 
     node_push = datalayerprovider.nodes.Push(db)  #add job to queue

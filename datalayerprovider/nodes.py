@@ -82,11 +82,11 @@ class Push:
         cb(Result(Result.OK), _data)
     
     def __on_write(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        _test = json.loads(data.get_string())
-        _isValid = validate(_test, self.schema)
+        # _test = json.loads(data.get_string())
+        # _isValid = validate(_test, self.schema)
  
         conn = datalayerprovider.utils.initialize(self.db)
-        if conn and _isValid:
+        if conn: # and _isValid:
             datalayerprovider.utils.add_job_order(conn, data.get_string())
             conn.close()
 
