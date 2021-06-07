@@ -56,7 +56,7 @@ class Push:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = db
+        self.db = db
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
         self.dataString
@@ -108,7 +108,7 @@ class Pop:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = db
+        self.db = db
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
         self.dataString
@@ -155,7 +155,7 @@ class Count:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = db
+        self.db = db
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
         print("__on_create")
@@ -205,7 +205,7 @@ class Done:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = db
+        self.db = db
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
         self.data
