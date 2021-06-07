@@ -30,31 +30,27 @@ import json
 
 import datalayer
 import datalayerprovider.nodes
-import datalayerprovider.database_utils
+import datalayerprovider.utils
 
 connectionProvider = "tcp://boschrexroth:boschrexroth@127.0.0.1:2070"
 
 def run_provider(provider : datalayer.provider.Provider):
-
-    print("bostroemc: Starting provider...")
-    queue = []
+    offset = [0, 0]  #Fetch offsets [queue, history]
     
-    db = os.environ.get("SNAP_COMMON") + "/temp.db"  # "/var/snap/datalayer-provider/common/temp.db"   
-    conn = datalayerprovider.database_utils.initialize(db)
+    db = "file:memdb1?mode=memory&cache=shared" #in-memory database used.     
+    conn = datalayerprovider.utils.initialize(db) #Leave one connection instance open to maintain memory
 
-    node_push = datalayerprovider.nodes.Push(queue, conn)  #add job to queue
-    node_pop = datalayerprovider.nodes.Pop(queue, conn)    #pop job from queue
-    node_count = datalayerprovider.nodes.Count(queue, conn)     #return queue/pending count
-    node_dump = datalayerprovider.nodes.Dump(queue, conn)      #dump queue
+    node_push = datalayerprovider.nodes.Push(db)  #add job to queue
+    node_pop = datalayerprovider.nodes.Pop(db)    #pop job from queue
+    node_count = datalayerprovider.nodes.Count(db)     #return queue/pending count, write zero to dump
     # node_fetch = datalayerprovider.my_provider_node.Fetch(queue)    #fetch items from db
-    node_done =  datalayerprovider.nodes.Done(queue, conn)     #add item to db or mark item in db as done
+    node_done =  datalayerprovider.nodes.Done(db)     #add item to db or mark item in db as done
 
 
     with datalayer.provider_node.ProviderNode(node_push.cbs, 1234) as node,         \
             datalayer.provider_node.ProviderNode(node_pop.cbs, 1234) as node_2,     \
             datalayer.provider_node.ProviderNode(node_count.cbs, 1234) as node_3,   \
-            datalayer.provider_node.ProviderNode(node_dump.cbs, 1234) as node_4,    \
-            datalayer.provider_node.ProviderNode(node_done.cbs, 1234) as node_5:
+            datalayer.provider_node.ProviderNode(node_done.cbs, 1234) as node_4:
         result = provider.register_node("mechatronics/job_request", node)
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Register job_request failed with: ", result)
@@ -67,11 +63,7 @@ def run_provider(provider : datalayer.provider.Provider):
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Register count failed with: ", result)
 
-        result = provider.register_node("mechatronics/dump", node_4)
-        if result != datalayer.variant.Result.OK:
-            print("bostroemc: Register count failed with: ", result)
-
-        result = provider.register_node("mechatronics/done", node_5)
+        result = provider.register_node("mechatronics/done", node_4)
         if result != datalayer.variant.Result.OK:
             print("bostroemc: Register count failed with: ", result)        
 
@@ -86,19 +78,14 @@ def run_provider(provider : datalayer.provider.Provider):
                 break
             time.sleep(1)
         
+        conn.close()     
+
         result = provider.stop()
-        print("bostroemc: Stopping provider loop...")
-
-        if result != datalayer.variant.Result.OK:
-            print("bostroemc: Stopping Provider failed with: ", result)
-
+ 
         result = provider.unregister_node("mechatronics/job_request")
-        if result != datalayer.variant.Result.OK:
-            print("bostroemc: Unregister Data Provider failed with: ", result)
-
         result = provider.unregister_node("mechatronics/pop")
-        if result != datalayer.variant.Result.OK:
-            print("bostroemc: Unregister Data Provider failed with: ", result)
+        result = provider.unregister_node("mechatronics/count")
+        result = provider.unregister_node("mechatronics/done")
 
 def run():
     print("bostroemc: Simple Snap for ctrlX Datalayer Provider with Python")

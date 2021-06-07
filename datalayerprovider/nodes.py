@@ -25,13 +25,13 @@ from datalayer.provider_node import ProviderNodeCallbacks, NodeCallback
 from datalayer.variant import Result, Variant
 
 import json
-import time
+# import time
 import os
-import sqlite3
+# import sqlite3
 from sqlite3 import Error
 from jsonschema import validate
 
-import datalayerprovider.database_utils
+import datalayerprovider.utils
 
 class Push:
     dataString: str = "Hello from Python Provider"
@@ -47,7 +47,7 @@ class Push:
         "required" : ["name", "email", "color"]
     }
     
-    def __init__(self, queue, conn):
+    def __init__(self, db):
         self.cbs = ProviderNodeCallbacks(
         self.__on_create,
         self.__on_remove,
@@ -56,8 +56,7 @@ class Push:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = queue
-        self.conn = conn
+        self.queue = db
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
         self.dataString
@@ -73,55 +72,34 @@ class Push:
         cb(Result(Result.OK), new_data)
 
     def __on_read(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-#        new_data = Variant()
-#        new_data.set_string(json.dumps(self.queue))
+        _data = Variant()
 
-        db = os.environ.get("SNAP_COMMON") + "/temp.db"  # "/var/snap/datalayer-provider/common/temp.db"   
-        conn = datalayerprovider.database_utils.initialize(db)
+        conn = datalayerprovider.utils.initialize(self.db)
+        if conn:
+            _data.set_string(json.dumps(datalayerprovider.utils.fetch_queue(conn, 50, 0))) 
+            conn.close()
 
-        new_data = Variant()
-        new_data.set_string(json.dumps(datalayerprovider.database_utils.fetch(conn, 10, 0)))   
-
-        conn.close()     
-
-        cb(Result(Result.OK), new_data)
+        cb(Result(Result.OK), _data)
     
     def __on_write(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
- #       test = json.loads(data.get_string())
-
- #       try:
- #           validate(test, self.schema)
- #           t = time.localtime()
- #           test["time"] = [time.strftime("%H:%M:%S", t)]
- #           test["time"].append("")
+        _test = json.loads(data.get_string())
+        _isValid = validate(_test, self.schema)
  
- #           test["id"] = self.id
-            # self.queue.append(data.get_string())
- #           self.queue.append(test)
- #       except ValidationError as e:
- #           print(e)       
-        
- #       self.id+=1
-        test = json.loads(data.get_string())
+        conn = datalayerprovider.utils.initialize(self.db)
+        if conn and _isValid:
+            datalayerprovider.utils.add_job_order(conn, data.get_string())
+            conn.close()
 
-        db = os.environ.get("SNAP_COMMON") + "/temp.db"  # "/var/snap/datalayer-provider/common/temp.db"   
-        conn = datalayerprovider.database_utils.initialize(db)
-
-        # datalayerprovider.database_utils.add_job_order(conn, test)
-        datalayerprovider.database_utils.add_job_order(conn, data.get_string())
-
-        conn.close()
- 
-        cb(Result(Result.OK), None)
+        cb(Result(Result.OK), None)        
 
     def __on_metadata(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
         print("__on_metadata")
         cb(Result(Result.OK), None)
 
 class Pop:
-    dataString: str = "Hello from Python Provider"
+    _value: str = ""
     
-    def __init__(self, queue, conn):
+    def __init__(self, db):
         self.cbs = ProviderNodeCallbacks(
         self.__on_create,
         self.__on_remove,
@@ -130,8 +108,7 @@ class Pop:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = queue
-        self.conn = conn
+        self.queue = db
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
         self.dataString
@@ -147,16 +124,21 @@ class Pop:
         cb(Result(Result.OK), new_data)
 
     def __on_read(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        new_data = Variant()
-        new_data.set_string(json.dumps(self.queue[0]) if len(self.queue)>0 else "")
-        cb(Result(Result.OK), new_data)
+        _data = Variant()  
+        _data.set_string(self._value)
+           
+        cb(Result(Result.OK), _data)
     
     def __on_write(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        new_data = Variant()
+        _data = Variant()
+   
+        conn = datalayerprovider.utils.initialize(self.db)
+        if conn:
+            self._value = json.dumps(datalayerprovider.utils.pop(conn))
+            _data.set_string(self._value)
+            conn.close()
 
-        new_data.set_string(json.dumps(self.queue[0]) if len(self.queue)>0 else "")
-        if len(self.queue)>0: self.queue.pop(0)
-        cb(Result(Result.OK), new_data)
+        cb(Result(Result.OK), _data)        
 
     def __on_metadata(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
         cb(Result(Result.OK), None)        
@@ -164,7 +146,7 @@ class Pop:
 class Count:
     data: int = 0
     
-    def __init__(self, queue, conn):
+    def __init__(self, db):
         self.cbs = ProviderNodeCallbacks(
         self.__on_create,
         self.__on_remove,
@@ -173,8 +155,7 @@ class Count:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = queue
-        self.conn = conn
+        self.queue = db
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
         print("__on_create")
@@ -183,32 +164,29 @@ class Count:
 
     def __on_remove(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
         # Not implemented because no wildcard is registered
-        print("__on_remove")
         cb(Result(Result.UNSUPPORTED), None)
 
     def __on_browse(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
-        print("__on_browse")
-        new_data = Variant()
-        new_data.set_array_string([])
-        cb(Result(Result.OK), new_data)
+        _data = Variant()
+        _data.set_array_string([])
+        cb(Result(Result.OK), _data)
 
     def __on_read(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        # print("bostroemc: count __on_read", len(self.queue))
-        # new_data = Variant()
-        # new_data.set_uint32(len(self.queue))
+        _data = Variant()
 
-        db = os.environ.get("SNAP_COMMON") + "/temp.db"  # "/var/snap/datalayer-provider/common/temp.db"   
-        conn = datalayerprovider.database_utils.initialize(db)
+        conn = datalayerprovider.utils.initialize(self.db)
+        if conn:
+            _data.set_uint32(datalayerprovider.utils.count(conn))
+            conn.close()
 
-        count = datalayerprovider.database_utils.count(conn)
-        new_data = Variant()
-        new_data.set_uint32(count)
-
-        conn.close()
-        cb(Result(Result.OK), new_data)
+        cb(Result(Result.OK), _data)
     
     def __on_write(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        print("bostroemc: __on_write")
+        conn = datalayerprovider.utils.initialize(self.db)
+        if conn and data.get_uint32() == 0:
+            datalayerprovider.utils.dump(conn)
+            conn.close()
+
         cb(Result(Result.OK), None)
 
     def __on_metadata(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
@@ -216,9 +194,9 @@ class Count:
         cb(Result(Result.OK), None)              
 
 class Done:
-    data: int = 0
+    _value: str = ""
     
-    def __init__(self, queue, conn):
+    def __init__(self, db):
         self.cbs = ProviderNodeCallbacks(
         self.__on_create,
         self.__on_remove,
@@ -227,80 +205,40 @@ class Done:
         self.__on_write,
         self.__on_metadata
         )
-        self.queue = queue
-        self.conn = conn
+        self.queue = db
 
     def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        print("__on_create")
         self.data
         cb(Result(Result.OK), None)
 
     def __on_remove(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
         # Not implemented because no wildcard is registered
-        print("__on_remove")
         cb(Result(Result.UNSUPPORTED), None)
 
     def __on_browse(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
-        print("__on_browse")
-        new_data = Variant()
-        new_data.set_array_string([])
-        cb(Result(Result.OK), new_data)
+        _data = Variant()
+        _data.set_array_string([])
+        cb(Result(Result.OK), _data)
 
     def __on_read(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        print("bostroemc: count __on_read", len(self.queue))
-        new_data = Variant()
-        new_data.set_uint32(len(self.queue))
-        cb(Result(Result.OK), new_data)
+        _data = Variant()  
+        _data.set_string(self._value)
+           
+        cb(Result(Result.OK), _data)
     
     def __on_write(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        print("bostroemc: __on_write")
-        cb(Result(Result.OK), None)
+        _data = Variant() 
+
+        conn = datalayerprovider.utils.initialize(self.db)
+        if conn:
+            self._value = json.dumps(datalayerprovider.utils.done(conn, data.get_uint32())}
+            _data.set_string(self._value)           
+            conn.close()
+
+        cb(Result(Result.OK), _data)
 
     def __on_metadata(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
         print("__on_metadata")
         cb(Result(Result.OK), None)    
 
-class Dump:
-    data: int = 0
-    
-    def __init__(self, queue, conn):
-        self.cbs = ProviderNodeCallbacks(
-        self.__on_create,
-        self.__on_remove,
-        self.__on_browse,
-        self.__on_read,
-        self.__on_write,
-        self.__on_metadata
-        )
-        self.queue = queue
-        self.conn = conn
-
-    def __on_create(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        print("__on_create")
-        self.data
-        cb(Result(Result.OK), None)
-
-    def __on_remove(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
-        # Not implemented because no wildcard is registered
-        print("__on_remove")
-        cb(Result(Result.UNSUPPORTED), None)
-
-    def __on_browse(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
-        print("__on_browse")
-        new_data = Variant()
-        new_data.set_array_string([])
-        cb(Result(Result.OK), new_data)
-
-    def __on_read(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        print("bostroemc: count __on_read", len(self.queue))
-        new_data = Variant()
-        new_data.set_uint32(len(self.queue))
-        cb(Result(Result.OK), new_data)
-    
-    def __on_write(self, userdata: datalayer.clib.userData_c_void_p, address: str, data: Variant, cb: NodeCallback):
-        print("bostroemc: __on_write")
-        cb(Result(Result.OK), None)
-
-    def __on_metadata(self, userdata: datalayer.clib.userData_c_void_p, address: str, cb: NodeCallback):
-        print("__on_metadata")
-        cb(Result(Result.OK), None)                    
+                 
